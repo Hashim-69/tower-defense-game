@@ -11,9 +11,12 @@ HUD_HEIGHT = 20
 TILE_SIZE = 16
 GRID_COLS = 20
 GRID_ROWS = 10
+MIN_TOWER_DISTANCE = 24  # low-res px; blocks placement within ~1.5 tiles of another tower
 
 # Path
 WAYPOINTS_GRID = [(0, 2), (15, 2), (15, 5), (3, 5), (3, 8), (19, 8)]
+WAYPOINTS_GRID_2 = [(0,1), (16,1), (16,3), (4,3), (4,6), (16,6), (16,8), (19,8)]
+WAYPOINTS_GRID_3 = [(0,0), (19,0), (19,2), (1,2), (1,4), (19,4), (19,6), (1,6), (1,9), (19,9)]
 
 # Economy
 START_GOLD = 150
@@ -52,4 +55,27 @@ ENEMY_STATS = {
 
 EYE_COLOR = (26, 26, 26)
 
+from waves import WAVES
 
+WAVES_LEVEL2 = [
+    {"enemies": ["walker"]*10,                          "interval": 0.9},
+    {"enemies": ["walker"]*8  + ["armored"]*4,          "interval": 0.8},
+    {"enemies": ["walker"]*10 + ["armored"]*6,          "interval": 0.7},
+    {"enemies": ["walker"]*8  + ["armored"]*10,         "interval": 0.6},
+    {"enemies": ["walker"]*12 + ["armored"]*12,         "interval": 0.5},
+]
+
+WAVES_LEVEL3 = [
+    {"enemies": ["walker"]*12 + ["armored"]*6,          "interval": 0.8},
+    {"enemies": ["walker"]*10 + ["armored"]*10,         "interval": 0.7},
+    {"enemies": ["walker"]*14 + ["armored"]*10,         "interval": 0.6},
+    {"enemies": ["walker"]*10 + ["armored"]*16,         "interval": 0.55},
+    {"enemies": ["walker"]*16 + ["armored"]*16,         "interval": 0.5},
+    {"enemies": ["walker"]*14 + ["armored"]*20,         "interval": 0.45},
+]
+
+LEVELS = [
+    {"path": WAYPOINTS_GRID,   "waves": WAVES,        "enemy_mult": {"hp": 1.0, "speed": 1.0}},
+    {"path": WAYPOINTS_GRID_2, "waves": WAVES_LEVEL2,  "enemy_mult": {"hp": 1.4, "speed": 1.15}},
+    {"path": WAYPOINTS_GRID_3, "waves": WAVES_LEVEL3,  "enemy_mult": {"hp": 1.8, "speed": 1.3}},
+]

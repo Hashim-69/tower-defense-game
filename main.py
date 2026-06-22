@@ -12,8 +12,8 @@ class GameState:
     def __init__(self):
         self.lives = START_LIVES
         self.gold = START_GOLD
-        self.game_over = False
-        self.game_won = False
+        self.game_state = 'playing'
+        self.current_level_index = 0
 
 def main():
     pygame.init()
@@ -28,15 +28,15 @@ def main():
     
     clock = pygame.time.Clock()
     
-    tile_map = grid.build_tile_map()
+    state = GameState()
+    tile_map = grid.build_tile_map(LEVELS[state.current_level_index]['path'])
     
     enemy_group = pygame.sprite.Group()
     towers_group = pygame.sprite.Group()
     projectile_group = pygame.sprite.Group()
-    spawner = Spawner()
+    spawner = Spawner(LEVELS[state.current_level_index]['waves'], LEVELS[state.current_level_index]['enemy_mult'])
     audio.play('wave_start')
     
-    state = GameState()
     font = pygame.font.Font(None, 24) # Default font, size 24 (a bit larger for visibility)
     
     running = True
@@ -48,31 +48,44 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if not state.game_over and not state.game_won:
+                if state.game_state in ('playing', 'build_phase'):
                     mx, my = pygame.mouse.get_pos()
                     lx, ly = mx // SCALE, my // SCALE
                     
-                    if ui.handle_click(lx, ly):
+                    click_res = ui.handle_click(lx, ly, state)
+                    if click_res == 'continue':
+                        spawner = Spawner(LEVELS[state.current_level_index]['waves'], LEVELS[state.current_level_index]['enemy_mult'])
+                        state.game_state = 'playing'
+                        continue
+                    elif click_res:
                         continue
                     
                     col = int(lx // TILE_SIZE)
                     row = int((ly - HUD_HEIGHT) // TILE_SIZE)
                     
                     if 0 <= col < GRID_COLS and 0 <= row < GRID_ROWS:
-                        if tile_map[col][row] == 'buildable' and (col, row) not in tower.occupied:
+                        if tower.is_valid_placement(col, row, tower.selected_tower_type, tile_map, tower.occupied, state.gold, towers_group):
                             cost = TOWER_STATS[tower.selected_tower_type]['cost']
-                            if state.gold >= cost:
-                                state.gold -= cost
-                                tower.occupied.add((col, row))
-                                new_tower = tower.Tower(tower.selected_tower_type, grid.grid_to_pixel(col, row))
-                                towers_group.add(new_tower)
+                            state.gold -= cost
+                            tower.occupied.add((col, row))
+                            new_tower = tower.Tower(tower.selected_tower_type, grid.grid_to_pixel(col, row))
+                            towers_group.add(new_tower)
                 
         # Game update logic
-        if not state.game_over and not state.game_won:
-            spawner.update(dt, enemy_group)
-            if spawner.current_wave_index > 3:
-                state.game_won = True
-                
+        if state.game_state == 'playing':
+            spawner.update(dt, enemy_group, LEVELS[state.current_level_index]['path'])
+            
+            if spawner.level_complete:
+                if state.current_level_index + 1 >= len(LEVELS):
+                    state.game_state = 'game_won'
+                else:
+                    state.current_level_index += 1
+                    towers_group.empty()
+                    tower.occupied.clear()
+                    tile_map = grid.build_tile_map(LEVELS[state.current_level_index]['path'])
+                    state.game_state = 'build_phase'
+                    
+        if state.game_state in ('playing', 'build_phase'):
             for t in towers_group:
                 t.update(dt, enemy_group, projectile_group)
                 
@@ -86,7 +99,7 @@ def main():
                 p.update(dt, state, enemy_group)
                     
             if state.lives <= 0:
-                state.game_over = True
+                state.game_state = 'game_over'
         
         # Drawing
         game_surface.fill(BG_COLOR)
@@ -102,7 +115,7 @@ def main():
         for p in projectile_group:
             p.draw(game_surface)
             
-        if spawner.delay_timer > 0 and not state.game_won and spawner.current_wave_index <= 3:
+        if state.game_state == 'playing' and spawner.delay_timer > 0 and not spawner.level_complete:
             time_left = max(0, int(4.0 - spawner.delay_timer) + 1)
             # Use smaller font for this long text
             small_font = pygame.font.Font(None, 16)
@@ -110,11 +123,11 @@ def main():
             text_rect = text_surf.get_rect(center=(LOW_RES[0] // 2, LOW_RES[1] // 2 - 20))
             game_surface.blit(text_surf, text_rect)
             
-        if state.game_over:
+        if state.game_state == 'game_over':
             text_surf = font.render("GAME OVER", False, (255, 0, 0))
             text_rect = text_surf.get_rect(center=(LOW_RES[0] // 2, LOW_RES[1] // 2))
             game_surface.blit(text_surf, text_rect)
-        elif state.game_won:
+        elif state.game_state == 'game_won':
             text_surf = font.render("YOU WIN", False, (0, 255, 0))
             text_rect = text_surf.get_rect(center=(LOW_RES[0] // 2, LOW_RES[1] // 2))
             game_surface.blit(text_surf, text_rect)

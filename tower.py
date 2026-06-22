@@ -4,9 +4,23 @@ from settings import *
 from projectile import Projectile
 import audio
 import utils
+import grid
 
 selected_tower_type = 'gunner'
 occupied = set()
+
+def is_valid_placement(col, row, tower_type, tile_map, occupied, gold, towers_group):
+    if tile_map[col][row] != 'buildable':
+        return False
+    if (col, row) in occupied:
+        return False
+    if gold < TOWER_STATS[tower_type]['cost']:
+        return False
+    candidate_pos = pygame.Vector2(grid.grid_to_pixel(col, row))
+    for t in towers_group:
+        if candidate_pos.distance_to(t.pos) < MIN_TOWER_DISTANCE:
+            return False
+    return True
 
 class Tower(pygame.sprite.Sprite):
     def __init__(self, tower_type, pos):

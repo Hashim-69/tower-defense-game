@@ -4,12 +4,12 @@ import grid
 import utils
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, enemy_type):
+    def __init__(self, enemy_type, waypoints=WAYPOINTS_GRID, hp_mult=1.0, speed_mult=1.0):
         super().__init__()
         self.type = enemy_type
         stats = ENEMY_STATS[enemy_type]
-        self.hp = stats['hp']
-        self.base_speed = stats['speed']
+        self.hp = stats['hp'] * hp_mult
+        self.base_speed = stats['speed'] * speed_mult
         self.reward = stats['reward']
         self.color = stats['color']
         self.radius = stats['radius']
@@ -17,7 +17,7 @@ class Enemy(pygame.sprite.Sprite):
         self.current_slow_mult = 1.0
         self.hit_flash_timer = 0
         
-        self.path = [grid.grid_to_pixel(c, r) for c, r in WAYPOINTS_GRID]
+        self.path = [grid.grid_to_pixel(c, r) for c, r in waypoints]
         self.pos = pygame.Vector2(self.path[0])
         self.waypoint_index = 1
         self.reached_end = False

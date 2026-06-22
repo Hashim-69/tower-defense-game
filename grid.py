@@ -1,14 +1,14 @@
 import pygame
 from settings import *
 
-def build_tile_map():
+def build_tile_map(waypoints=WAYPOINTS_GRID):
     # Initialize grid with 'buildable'
     tile_map = [['buildable' for _ in range(GRID_ROWS)] for _ in range(GRID_COLS)]
     
     # Walk through each consecutive pair of waypoints
-    for i in range(len(WAYPOINTS_GRID) - 1):
-        col1, row1 = WAYPOINTS_GRID[i]
-        col2, row2 = WAYPOINTS_GRID[i + 1]
+    for i in range(len(waypoints) - 1):
+        col1, row1 = waypoints[i]
+        col2, row2 = waypoints[i + 1]
         
         if col1 == col2:
             # Vertical segment
