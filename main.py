@@ -1,5 +1,6 @@
 import pygame
 import sys
+import asyncio
 from settings import *
 import grid
 import enemy
@@ -15,7 +16,7 @@ class GameState:
         self.game_state = 'playing'
         self.current_level_index = 0
 
-def main():
+async def main():
     pygame.init()
     audio.init()
     
@@ -138,6 +139,7 @@ def main():
         screen.blit(scaled, (0, 0))
         
         pygame.display.flip()
+        await asyncio.sleep(0)
 
     pygame.quit()
     sys.exit()
