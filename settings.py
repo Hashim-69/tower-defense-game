@@ -30,16 +30,19 @@ TOWER_STATS = {
         'outline_color': (43, 111, 68), 'highlight_color': (163, 232, 192)
     },
     'cannon': {
-        'cost': 100, 'damage': 20, 'range': 50, 'cooldown': 1.2,
+        'cost': 250, 'damage': 20, 'range': 50, 'cooldown': 1.2,
         'proj_speed': 140, 'splash_radius': 24, 'color': (220, 140, 60),
         'outline_color': (138, 85, 31), 'highlight_color': (245, 200, 150)
     },
     'frost': {
-        'cost': 75, 'damage': 4, 'range': 55, 'cooldown': 0.8,
+        'cost': 400, 'damage': 4, 'range': 55, 'cooldown': 0.8,
         'proj_speed': 200, 'slow_mult': 0.5, 'slow_duration': 2.0, 'color': (100, 180, 230),
         'outline_color': (51, 110, 143), 'highlight_color': (185, 226, 250)
     }
 }
+
+# Per-type purchase limits (tracked per game, not per level)
+TOWER_PURCHASE_LIMITS = {'gunner': 4, 'cannon': 2, 'frost': 1}
 
 # Enemy stats
 ENEMY_STATS = {
@@ -50,6 +53,14 @@ ENEMY_STATS = {
     'armored': {
         'hp': 90, 'speed': 25, 'reward': 12, 'radius': 5, 'color': (150, 40, 40),
         'outline_color': (92, 23, 23), 'highlight_color': (197, 101, 101)
+    },
+    'runner': {
+        'hp': 18, 'speed': 70, 'reward': 8, 'radius': 4,
+        'color': (235, 195, 60), 'outline_color': (141, 117, 36), 'highlight_color': (245, 225, 140)
+    },
+    'brute': {
+        'hp': 180, 'speed': 18, 'reward': 25, 'radius': 7,
+        'color': (110, 70, 150), 'outline_color': (60, 38, 82), 'highlight_color': (170, 140, 200)
     }
 }
 
@@ -58,20 +69,20 @@ EYE_COLOR = (26, 26, 26)
 from waves import WAVES
 
 WAVES_LEVEL2 = [
-    {"enemies": ["walker"]*10,                          "interval": 0.9},
-    {"enemies": ["walker"]*8  + ["armored"]*4,          "interval": 0.8},
-    {"enemies": ["walker"]*10 + ["armored"]*6,          "interval": 0.7},
-    {"enemies": ["walker"]*8  + ["armored"]*10,         "interval": 0.6},
-    {"enemies": ["walker"]*12 + ["armored"]*12,         "interval": 0.5},
+    {"enemies": ["walker"]*10,                                              "interval": 0.9},
+    {"enemies": ["walker"]*8  + ["armored"]*4  + ["runner"]*4,              "interval": 0.8},
+    {"enemies": ["walker"]*10 + ["armored"]*6  + ["runner"]*6,              "interval": 0.7},
+    {"enemies": ["walker"]*8  + ["armored"]*10 + ["runner"]*4 + ["brute"]*1, "interval": 0.6},
+    {"enemies": ["walker"]*12 + ["armored"]*12 + ["runner"]*6 + ["brute"]*2, "interval": 0.5},
 ]
 
 WAVES_LEVEL3 = [
-    {"enemies": ["walker"]*12 + ["armored"]*6,          "interval": 0.8},
-    {"enemies": ["walker"]*10 + ["armored"]*10,         "interval": 0.7},
-    {"enemies": ["walker"]*14 + ["armored"]*10,         "interval": 0.6},
-    {"enemies": ["walker"]*10 + ["armored"]*16,         "interval": 0.55},
-    {"enemies": ["walker"]*16 + ["armored"]*16,         "interval": 0.5},
-    {"enemies": ["walker"]*14 + ["armored"]*20,         "interval": 0.45},
+    {"enemies": ["walker"]*12 + ["armored"]*6  + ["runner"]*6,               "interval": 0.8},
+    {"enemies": ["walker"]*10 + ["armored"]*10 + ["runner"]*8  + ["brute"]*1, "interval": 0.7},
+    {"enemies": ["walker"]*14 + ["armored"]*10 + ["runner"]*8  + ["brute"]*2, "interval": 0.6},
+    {"enemies": ["walker"]*10 + ["armored"]*16 + ["runner"]*10 + ["brute"]*2, "interval": 0.55},
+    {"enemies": ["walker"]*16 + ["armored"]*16 + ["runner"]*10 + ["brute"]*3, "interval": 0.5},
+    {"enemies": ["walker"]*14 + ["armored"]*20 + ["runner"]*12 + ["brute"]*4, "interval": 0.45},
 ]
 
 LEVELS = [

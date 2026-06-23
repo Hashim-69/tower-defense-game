@@ -73,3 +73,24 @@ class Enemy(pygame.sprite.Sprite):
                 utils.draw_part(surface, cx, cy, -4, -4, 3, 3, high_color)
                 utils.draw_part(surface, cx, cy, -2, 0, 1, 1, EYE_COLOR)
                 utils.draw_part(surface, cx, cy, 1, 0, 1, 1, EYE_COLOR)
+            elif self.type == 'runner':
+                # Low, wide, finned silhouette
+                utils.draw_part(surface, cx, cy, -7, -5, 14, 8, out_color)
+                utils.draw_part(surface, cx, cy, -4, -4, 8, 2, fill_color)
+                utils.draw_part(surface, cx, cy, -6, -2, 12, 3, fill_color)
+                utils.draw_part(surface, cx, cy, -4, 1, 8, 2, fill_color)
+                utils.draw_poly(surface, cx, cy, [(-7, -1), (-10, 0), (-7, 1)], fill_color)
+                utils.draw_poly(surface, cx, cy, [(7, -1), (10, 0), (7, 1)], fill_color)
+                utils.draw_part(surface, cx, cy, -4, -3, 3, 2, high_color)
+                utils.draw_part(surface, cx, cy, -2, -3, 1, 1, EYE_COLOR)
+                utils.draw_part(surface, cx, cy, 1, -3, 1, 1, EYE_COLOR)
+            elif self.type == 'brute':
+                # Tall, bulky, side-plated silhouette
+                utils.draw_part(surface, cx, cy, -9, -9, 18, 18, out_color)
+                utils.draw_part(surface, cx, cy, -4, -9, 8, 6, fill_color)
+                utils.draw_part(surface, cx, cy, -7, -5, 14, 12, fill_color)
+                utils.draw_poly(surface, cx, cy, [(-7, -5), (-4, -2), (-7, 1), (-10, -2)], fill_color)
+                utils.draw_poly(surface, cx, cy, [(7, -5), (10, -2), (7, 1), (4, -2)], fill_color)
+                utils.draw_part(surface, cx, cy, -6, -3, 5, 5, high_color)
+                utils.draw_part(surface, cx, cy, -2, -7, 1, 1, EYE_COLOR)
+                utils.draw_part(surface, cx, cy, 1, -7, 1, 1, EYE_COLOR)

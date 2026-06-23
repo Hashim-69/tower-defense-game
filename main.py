@@ -31,6 +31,8 @@ async def main():
     
     state = GameState()
     tile_map = grid.build_tile_map(LEVELS[state.current_level_index]['path'])
+    tower_purchase_counts = {'gunner': 0, 'cannon': 0, 'frost': 0}
+    frost_available = False  # Frost locked on level 1, unlocks from level 2 onward
     
     enemy_group = pygame.sprite.Group()
     towers_group = pygame.sprite.Group()
@@ -53,7 +55,7 @@ async def main():
                     mx, my = pygame.mouse.get_pos()
                     lx, ly = mx // SCALE, my // SCALE
                     
-                    click_res = ui.handle_click(lx, ly, state)
+                    click_res = ui.handle_click(lx, ly, state, tower_purchase_counts, frost_available)
                     if click_res == 'continue':
                         spawner = Spawner(LEVELS[state.current_level_index]['waves'], LEVELS[state.current_level_index]['enemy_mult'])
                         state.game_state = 'playing'
@@ -65,10 +67,11 @@ async def main():
                     row = int((ly - HUD_HEIGHT) // TILE_SIZE)
                     
                     if 0 <= col < GRID_COLS and 0 <= row < GRID_ROWS:
-                        if tower.is_valid_placement(col, row, tower.selected_tower_type, tile_map, tower.occupied, state.gold, towers_group):
+                        if tower.is_valid_placement(col, row, tower.selected_tower_type, tile_map, tower.occupied, state.gold, towers_group, tower_purchase_counts, frost_available):
                             cost = TOWER_STATS[tower.selected_tower_type]['cost']
                             state.gold -= cost
                             tower.occupied.add((col, row))
+                            tower_purchase_counts[tower.selected_tower_type] += 1
                             new_tower = tower.Tower(tower.selected_tower_type, grid.grid_to_pixel(col, row))
                             towers_group.add(new_tower)
                 
@@ -84,6 +87,9 @@ async def main():
                     towers_group.empty()
                     tower.occupied.clear()
                     tile_map = grid.build_tile_map(LEVELS[state.current_level_index]['path'])
+                    # Reset purchase limits each level — Frost unlocks from level 2 onward
+                    tower_purchase_counts = {'gunner': 0, 'cannon': 0, 'frost': 0}
+                    frost_available = state.current_level_index >= 1
                     state.game_state = 'build_phase'
                     
         if state.game_state in ('playing', 'build_phase'):
@@ -105,7 +111,7 @@ async def main():
         # Drawing
         game_surface.fill(BG_COLOR)
         grid.draw_grid(game_surface, tile_map)
-        ui.draw_hud(game_surface, state, spawner)
+        ui.draw_hud(game_surface, state, spawner, tower_purchase_counts, frost_available)
         
         for t in towers_group:
             t.draw(game_surface)
@@ -145,4 +151,4 @@ async def main():
     sys.exit()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

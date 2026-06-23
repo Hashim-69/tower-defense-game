@@ -9,12 +9,16 @@ import grid
 selected_tower_type = 'gunner'
 occupied = set()
 
-def is_valid_placement(col, row, tower_type, tile_map, occupied, gold, towers_group):
+def is_valid_placement(col, row, tower_type, tile_map, occupied, gold, towers_group, purchase_counts, frost_available=True):
     if tile_map[col][row] != 'buildable':
         return False
     if (col, row) in occupied:
         return False
     if gold < TOWER_STATS[tower_type]['cost']:
+        return False
+    if purchase_counts[tower_type] >= TOWER_PURCHASE_LIMITS[tower_type]:
+        return False
+    if tower_type == 'frost' and not frost_available:
         return False
     candidate_pos = pygame.Vector2(grid.grid_to_pixel(col, row))
     for t in towers_group:
