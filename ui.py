@@ -21,11 +21,22 @@ COUNT_LABEL_Y = 11
 TOWER_ORDER = ('gunner', 'cannon', 'frost')
 _strip_x = LOW_RES[0] - RIGHT_MARGIN - (len(TOWER_ORDER) * GROUP_WIDTH + (len(TOWER_ORDER) - 1) * GROUP_GAP)
 
-BUTTONS = [
-    {'type': t,
-     'rect': pygame.Rect(_strip_x + i * (GROUP_WIDTH + GROUP_GAP), BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE)}
-    for i, t in enumerate(TOWER_ORDER)
-]
+# Touch targets. The drawn swatch is 14x14, which lands at roughly 17 CSS px on
+# a phone — far under the ~44px a finger needs. Each button therefore carries a
+# separate 'hit' rect covering its whole group (swatch + labels) and the full
+# height of the HUD bar, while what gets drawn is unchanged. The hit rect stops
+# at the HUD boundary on purpose: extending it downward would swallow taps meant
+# for the top row of tiles.
+HIT_PAD_X = 2
+
+BUTTONS = []
+for _i, _t in enumerate(TOWER_ORDER):
+    _x = _strip_x + _i * (GROUP_WIDTH + GROUP_GAP)
+    BUTTONS.append({
+        'type': _t,
+        'rect': pygame.Rect(_x, BUTTON_Y, BUTTON_SIZE, BUTTON_SIZE),
+        'hit': pygame.Rect(_x - HIT_PAD_X, 0, GROUP_WIDTH + 2 * HIT_PAD_X, HUD_HEIGHT),
+    })
 
 CONTINUE_BUTTON = pygame.Rect(LOW_RES[0] // 2 - 40, LOW_RES[1] // 2 + 10, 80, 24)
 
@@ -119,7 +130,7 @@ def handle_click(lx, ly, state, purchase_counts, frost_available=True):
         return 'continue'
 
     for btn in BUTTONS:
-        if btn['rect'].collidepoint(lx, ly):
+        if btn['hit'].collidepoint(lx, ly):
             t = btn['type']
             # Block maxed-out or locked towers
             if purchase_counts[t] >= TOWER_PURCHASE_LIMITS[t]:

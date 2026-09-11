@@ -93,6 +93,31 @@ pip install pyinstaller
 pyinstaller --onefile --add-data "assets;assets" main.py
 ```
 (On Mac/Linux, use `assets:assets` — colon instead of semicolon.)
+
+## Web build (GitHub Pages)
+
+The playable build lives on the `gh-pages` branch and is served at
+<https://hashim-69.github.io/tower-defense-game/>.
+
+`web/index.html` is the **source of truth** for the pygbag loader page. It is a
+pygbag 0.9.3 template with hand-made changes that a plain `pygbag --build` does
+not produce and *will overwrite*:
+
+- the canvas is letterboxed to 16:9 and centred, instead of being stretched to
+  the viewport's shape (which distorted the game badly in portrait)
+- `touch-action: none` and `overscroll-behavior: none`, so double-tap zoom and
+  pull-to-refresh don't eat taps meant for the game
+- a portrait "rotate your device" hint, non-interactive so it can never swallow
+  the tap pygbag needs to unlock audio
+- one coherent viewport meta tag, and dark letterbox bars
+
+To deploy, package the runtime files into the two archives the loader fetches
+(`tower.defence.tar.gz` for the web, `tower.defence.apk` for itch.io), each
+containing the `.py` files under `assets/` and the audio under `assets/assets/`,
+then copy them and `web/index.html` onto `gh-pages`.
+
+Only the `-pygbag.ogg` audio ships to the web: `audio.py` switches extension on
+`sys.platform == "emscripten"`. The `.wav` files are desktop-only.
  
 ## Project structure
  
