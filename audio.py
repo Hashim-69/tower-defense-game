@@ -2,22 +2,34 @@ import pygame
 import sys
 import os
 
-def resource_path(rel_path):
-    base = getattr(sys, '_MEIPASS', os.path.abspath("."))
-    return os.path.join(base, rel_path)
+_ASSET_DIR = os.path.join(
+    getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))),
+    'assets',
+)
+
+# The pygbag (WebAssembly) build ships ogg copies because the browser mixer does
+# not reliably decode these wavs; native builds keep using the wavs.
+_EXT = '-pygbag.ogg' if sys.platform == 'emscripten' else '.wav'
+
+SOUND_NAMES = ('shoot', 'hit', 'death', 'wave_start')
 
 SOUNDS = {}
 
 def init():
-    pygame.mixer.init()
     try:
-        SOUNDS['shoot'] = pygame.mixer.Sound(resource_path('assets/shoot.wav'))
-        SOUNDS['hit'] = pygame.mixer.Sound(resource_path('assets/hit.wav'))
-        SOUNDS['death'] = pygame.mixer.Sound(resource_path('assets/death.wav'))
-        SOUNDS['wave_start'] = pygame.mixer.Sound(resource_path('assets/wave_start.wav'))
+        # mixer.init() raises on a machine with no audio device (CI, headless
+        # servers); that used to take the whole game down before the first frame.
+        pygame.mixer.init()
+        # Default is 8 channels, which a few gunners at a 0.3s cooldown exhaust,
+        # cutting off death and wave-start cues mid-playback.
+        pygame.mixer.set_num_channels(16)
+        for name in SOUND_NAMES:
+            SOUNDS[name] = pygame.mixer.Sound(os.path.join(_ASSET_DIR, name + _EXT))
     except Exception as e:
-        print("Warning: Could not load sound files:", e)
+        SOUNDS.clear()
+        print("Warning: audio disabled:", e)
 
 def play(name):
-    if name in SOUNDS:
-        SOUNDS[name].play()
+    sound = SOUNDS.get(name)
+    if sound is not None:
+        sound.play()

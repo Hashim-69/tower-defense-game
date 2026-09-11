@@ -1,7 +1,11 @@
+from waves import WAVES
+
 # Rendering
 LOW_RES = (320, 180)
 SCALE = 4
-WINDOW_SIZE = (1280, 720)
+# Derived so the window can never drift out of sync with the low-res surface;
+# main.py maps mouse coords back through the real screen size regardless.
+WINDOW_SIZE = (LOW_RES[0] * SCALE, LOW_RES[1] * SCALE)
 FPS = 60
 BG_COLOR = (30, 30, 40)
 HUD_COLOR = (20, 20, 25)
@@ -17,6 +21,11 @@ MIN_TOWER_DISTANCE = 24  # low-res px; blocks placement within ~1.5 tiles of ano
 WAYPOINTS_GRID = [(0, 2), (15, 2), (15, 5), (3, 5), (3, 8), (19, 8)]
 WAYPOINTS_GRID_2 = [(0,1), (16,1), (16,3), (4,3), (4,6), (16,6), (16,8), (19,8)]
 WAYPOINTS_GRID_3 = [(0,0), (19,0), (19,2), (1,2), (1,4), (19,4), (19,6), (1,6), (1,9), (19,9)]
+
+# Timing
+WAVE_DELAY = 4.0        # seconds between cleared wave and next wave
+HIT_FLASH_TIME = 0.1    # seconds an enemy flashes white after taking damage
+PROJECTILE_HIT_RADIUS = 4
 
 # Economy
 START_GOLD = 150
@@ -65,8 +74,6 @@ ENEMY_STATS = {
 }
 
 EYE_COLOR = (26, 26, 26)
-
-from waves import WAVES
 
 WAVES_LEVEL2 = [
     {"enemies": ["walker"]*10,                                              "interval": 0.9},
