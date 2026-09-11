@@ -23,7 +23,7 @@ from pathlib import Path
 # do not rename
 async def custom_site():
     import embed
-    platform.document.body.style.background = "#7f7f7f"
+    platform.document.body.style.background = "#14141c"
 
     platform.window.transfer.hidden = true
     platform.window.canvas.style.visibility = "visible"
@@ -181,8 +181,7 @@ function show_infobox() {
     <title>tower.defence</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" content="height=device-height, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes"/>
 
@@ -222,25 +221,69 @@ function show_infobox() {
         canvas.emscripten {
             border: 0px none;
             background-color: transparent;
-            width: 100%;
-            height: 100%;
             z-index: 5;
 
             padding: 0;
-            margin: 0 auto;
 
+            /* Letterbox: the largest 16:9 box that fits, centred. This was
+               width/height 100%/100%, which stretched the fixed 1280x720
+               framebuffer to the viewport's shape — badly distorted in
+               portrait. inset:0 + margin:auto centres on both axes.
+               !important because pygbag's window_resize() writes these as
+               inline styles. Still no border/padding, so emscripten's mouse
+               mapping (which divides by getBoundingClientRect) stays correct. */
             position: absolute;
             top: 0;
             bottom: 0;
             left: 0;
             right: 0;
+            margin: auto !important;
+            width: min(100vw, calc(100vh * 16 / 9)) !important;
+            height: min(100vh, calc(100vw * 9 / 16)) !important;
+
+            /* keep double-tap zoom, pull-to-refresh and drag-scroll from
+               eating taps meant for the game */
+            touch-action: none;
         }
 
-        body {
+        /* dvh tracks mobile browser chrome (the collapsing URL bar) */
+        @supports (height: 100dvh) {
+            canvas.emscripten {
+                width: min(100vw, calc(100dvh * 16 / 9)) !important;
+                height: min(100dvh, calc(100vw * 9 / 16)) !important;
+            }
+        }
+
+        #rotate-hint {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 999998;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 6vw;
+            font: bold 6vw/1.4 arial, sans-serif;
+            color: #cfcfd8;
+            background: #14141c;
+            /* never swallow the tap pygbag needs to unlock audio */
+            pointer-events: none;
+        }
+        #rotate-hint small { font-weight: normal; font-size: .5em; color: #8a8a99; margin-top: 1.2em; }
+        @media (orientation: portrait) and (max-width: 1024px) {
+            #rotate-hint { display: flex; }
+        }
+
+        html, body {
             font-family: arial;
             margin: 0;
-            padding: none;
-            background-color:powderblue;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            background-color: #14141c;
+            touch-action: none;
         }
 
         .topright{
@@ -311,6 +354,8 @@ width="1280px"
 height="720px"
     oncontextmenu="event.preventDefault()" tabindex=1 hidden>
     </canvas>
+
+    <div id="rotate-hint">Rotate your device<small>this game is landscape only</small></div>
 
     <div id="infobox">Loading, please wait ...</div>
 
